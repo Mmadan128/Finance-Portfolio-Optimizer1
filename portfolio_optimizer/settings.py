@@ -79,3 +79,4 @@ STATIC_URL = '/static/'
 
 # Specify the path for static files
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+ETH_NODE_URL = 'https://mainnet.infura.io/v3/dafa31f6be324cf88b71fb47d0b6536a'

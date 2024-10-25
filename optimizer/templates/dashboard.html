@@ -1,106 +1,140 @@
-<!-- templates/users/dashboard.html -->
 {% extends 'layout.html' %}
-
-{% block title %}Dashboard{% endblock %}
-
-{% block sidebar %}
-<h2>Portfolio Optimizer</h2>
-<ul>
-    <li><a href="{% url 'login' %}">Login</a></li>
-    <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-    <li><a href="{% url 'portfolio' %}">Portfolio</a></li>
-    <li><a href="{% url 'optimization' %}">Optimization</a></li>
-    <li><a href="{% url 'reports' %}">Reports</a></li>
-</ul>
-{% endblock %}
+{% block title %}Dashboard - Portfolio Optimizer{% endblock %}
 
 {% block content %}
-<div class="widgets-section">
-    <div class="widget">
-        <div class="progress-circle">
-            <div class="progress-value">60%</div>
+<div class="dashboard-header">
+    <h1 class="text-center">Dashboard</h1>
+    <p class="text-center">Welcome to your Portfolio Optimizer Dashboard!</p>
+</div>
+
+<div class="row">
+    <!-- Key Metrics Cards -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Total Investments</h5>
+                <p class="card-text">$<span id="total-investments">100,000</span></p>
+            </div>
         </div>
-        <h2>Portfolio Return</h2>
     </div>
-    <div class="widget">
-        <div class="progress-circle" style="background: conic-gradient(#FFCE56 0 40%, #f4f4f9 40%);">
-            <div class="progress-value">40%</div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Current Portfolio Value</h5>
+                <p class="card-text">$<span id="current-value">120,000</span></p>
+            </div>
         </div>
-        <h2>Volatility</h2>
     </div>
-    <div class="widget">
-        <div class="progress-circle" style="background: conic-gradient(#FF6384 0 70%, #f4f4f9 70%);">
-            <div class="progress-value">70%</div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Investment Growth</h5>
+                <p class="card-text">+<span id="growth-percentage">20%</span></p>
+            </div>
         </div>
-        <h2>Sharpe Ratio</h2>
     </div>
 </div>
 
-<div class="info-cards">
-    <div class="info-card">
-        <h3>Expected Returns</h3>
-        <p>9.3%</p>
-    </div>
-    <div class="info-card">
-        <h3>Volatility</h3>
-        <p>12.5%</p>
-    </div>
-    <div class="info-card">
-        <h3>Variance</h3>
-        <p>1.5%</p>
+<div class="row">
+    <!-- Chart Area -->
+    <div class="col-md-12">
+        <h3 class="text-center">Portfolio Performance Over Time</h3>
+        <canvas id="performanceChart" style="max-height: 400px;"></canvas>
     </div>
 </div>
 
-<div class="chart-section">
-    <div class="chart-container">
-        <canvas id="assetChart"></canvas>
+<div class="row mt-4">
+    <!-- Recent Activities Table -->
+    <div class="col-md-12">
+        <h3 class="text-center">Recent Activities</h3>
+        <table class="table table-dark table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Action</th>
+                    <th scope="col">Asset</th>
+                    <th scope="col">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2024-10-20</td>
+                    <td>Invested</td>
+                    <td>Apple (AAPL)</td>
+                    <td>$5,000</td>
+                </tr>
+                <tr>
+                    <td>2024-10-18</td>
+                    <td>Sold</td>
+                    <td>Google (GOOGL)</td>
+                    <td>$3,000</td>
+                </tr>
+                <tr>
+                    <td>2024-10-15</td>
+                    <td>Invested</td>
+                    <td>Microsoft (MSFT)</td>
+                    <td>$2,000</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
+
+<div class="row mt-4">
+    <!-- Additional Widgets -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Total Assets</h5>
+                <p class="card-text">$<span id="total-assets">150,000</span></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Monthly Returns</h5>
+                <p class="card-text">+<span id="monthly-returns">5%</span></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Investment Diversification</h5>
+                <p class="card-text">High</p>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    function initializeAssetAllocationChart() {
-        var ctx = document.getElementById('assetChart').getContext('2d');
-        var assetChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Stocks', 'Bonds', 'Real Estate'],
-                datasets: [{
-                    label: 'Asset Allocation',
-                    data: [40, 35, 25],
-                    backgroundColor: ['#36A2EB', '#FFCE56', '#FF6384'],
-                    hoverBackgroundColor: ['#36A2EB', '#FFCE56', '#FF6384'],
-                    borderRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'top', labels: { color: '#333' } },
-                    tooltip: {
-                        callbacks: {
-                            label: function(tooltipItem) {
-                                return tooltipItem.label + ': ' + tooltipItem.raw + '%';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { color: '#333', callback: (value) => value + '%' }
-                    },
-                    x: { ticks: { color: '#333' } }
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    const performanceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            datasets: [{
+                label: 'Portfolio Value',
+                data: [100000, 105000, 110000, 115000, 120000, 125000, 130000],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderWidth: 2,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
                 }
             }
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeAssetAllocationChart();
+        }
     });
 </script>
 {% endblock %}

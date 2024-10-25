@@ -1,33 +1,24 @@
 {% extends "layout.html" %}
-{% load static %}
+{% load static %}  
+
 
 {% block title %}Home - Portfolio Optimizer{% endblock %}
 
+{% block video_background %}
+<video class="background-video" autoplay muted loop>
+    <source src="{% static 'videos/background.mp4' %}" type="video/mp4">
+    Your browser does not support HTML5 video.
+</video>
+<div class="overlay"></div>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-5 text-center text-white">
+<div class="container mt-5 text-center text-white" style="position: relative; z-index: 1;">
     <h1>Welcome to the Portfolio Optimizer</h1>
     <p class="lead">Optimize your investments with cutting-edge technology and AI.</p>
 
-    <!-- Spline 3D Widget Section -->
-    <div class="spline-widget-container mt-5">
-        <iframe src="https://my.spline.design/rocket-dbfb03b766ad2b4229fb5b902f60b4e8/" 
-                frameborder="0"
-                width="100%"
-                height="500px"
-                style="border-radius: 15px;">
-        </iframe>
-    </div>
-
     <div class="mt-5">
-        <a href="{% url 'optimization' %}"Optimize Portfolio class="btn btn-primary">Get Started</a>
+        <a href="{% url 'optimization' %}" class="btn btn-primary">Get Started</a>
     </div>
 </div>
-
-<style>
-    .spline-widget-container {
-        margin: 0 auto;
-        max-width: 800px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    }
-</style>
 {% endblock %}

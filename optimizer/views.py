@@ -9,6 +9,7 @@ from .portfolio_optimizer import optimize_portfolio
 from .ml_models.stock_predictor import StockPredictor
 from .forms import RegistrationForm
 from .models import OptimizationReport
+from django.conf import settings
 def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -108,16 +109,15 @@ from django.shortcuts import render
 from .models import OptimizationReport
 
 def reports(request):
-    reports = OptimizationReport.objects.all()
+    # Fetch all optimization reports
+    reports = OptimizationReport.objects.all().distinct()  # Ensure distinct records
     
     # Preprocess the stock tickers and percentages
     for report in reports:
-        # Strip whitespace and convert to lists
         report.stock_tickers_list = [ticker.strip() for ticker in report.stock_tickers.split(',')]
         report.stock_percentages_list = [percentage.strip() for percentage in report.stock_percentages.split(',')]
-
+    
     return render(request, 'reports.html', {'reports': reports})
-
 def home(request):
     return render(request, 'home.html')
 
@@ -135,3 +135,33 @@ def fetch_realtime_data(request):
             current_price = stock.history(period='1d')['Close'].iloc[-1]  # Get the last closing price
             data[ticker] = current_price
         return JsonResponse(data)
+
+from web3 import Web3
+
+def eth_interaction(request):
+    if request.method == 'POST':
+        # Get data from the form
+        recipient_address = request.POST.get('recipient_address')
+        amount = request.POST.get('amount')
+
+        # Connect to Ethereum node
+        w3 = Web3(Web3.HTTPProvider(settings.ETH_NODE_URL))
+
+        # Create a transaction
+        transaction = {
+            'to': recipient_address,
+            'value': w3.toWei(amount, 'ether'),
+            'gas': 2000000,
+            'gasPrice': w3.toWei('50', 'gwei'),
+            'nonce': w3.eth.getTransactionCount(w3.eth.defaultAccount),
+        }
+
+        # Sign the transaction
+        signed_txn = w3.eth.account.signTransaction(transaction, private_key='YOUR_PRIVATE_KEY')  # Use environment variables for security
+
+        # Send the transaction
+        txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+
+        return render(request, 'eth_interaction.html', {'txn_hash': txn_hash.hex()})
+
+    return render(request, 'eth_interaction.html')

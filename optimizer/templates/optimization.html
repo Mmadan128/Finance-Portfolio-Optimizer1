@@ -14,6 +14,30 @@
     .result-box {
         max-height: 400px; /* Limit height of result box for better scrolling */
         overflow-y: auto; /* Enable scrolling within result box if content overflows */
+        background-color: rgba(255, 255, 255, 0.8); /* Light background for better visibility */
+        border-radius: 8px; /* Rounded corners */
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem; /* Increased bottom margin for form elements */
+    }
+
+    .btn {
+        margin-top: 1rem; /* Added top margin for buttons */
+    }
+
+    h1, h2 {
+        margin-bottom: 1.5rem; /* Increased bottom margin for headers */
+    }
+
+    .list-group-item {
+        margin: 0.5rem 0; /* Vertical gap between list items */
+    }
+
+    .header {
+        padding: 2rem 0; /* Added padding for the header */
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2); /* Subtle bottom border */
     }
 </style>
 
@@ -46,7 +70,7 @@
     </form>
 
     {% if results %}
-    <div class="result-box mt-4 border rounded p-3 bg-light shadow">
+    <div class="result-box mt-4 border rounded p-3 shadow">
         <h2 class="text-center">Optimization Results</h2>
         <ul class="list-group">
             <li class="list-group-item font-weight-bold">Optimized Weights:</li>
