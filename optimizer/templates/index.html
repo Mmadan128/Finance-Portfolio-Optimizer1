@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Portfolio Optimizer</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
+</head>
+<body>
+    <div class="container">
+        <h1>Financial Portfolio Optimizer</h1>
+
+        <!-- Form to enter stock data -->
+        <form id="portfolio-form">
+            <div class="form-group">
+                <label for="stockSymbol1">Stock Symbol 1:</label>
+                <input type="text" id="stockSymbol1" name="stockSymbol1" placeholder="e.g., AAPL" required>
+            </div>
+            <div class="form-group">
+                <label for="stockAmount1">Amount Invested 1 ($):</label>
+                <input type="number" id="stockAmount1" name="stockAmount1" placeholder="e.g., 5000" required>
+            </div>
+
+            <div class="form-group">
+                <label for="stockSymbol2">Stock Symbol 2:</label>
+                <input type="text" id="stockSymbol2" name="stockSymbol2" placeholder="e.g., MSFT" required>
+            </div>
+            <div class="form-group">
+                <label for="stockAmount2">Amount Invested 2 ($):</label>
+                <input type="number" id="stockAmount2" name="stockAmount2" placeholder="e.g., 3000" required>
+            </div>
+
+            <button type="submit">Submit</button>
+        </form>
+
+        <!-- Chart for Current Portfolio -->
+        <div id="current-portfolio-chart" class="chart">
+            <h2>Current Portfolio</h2>
+            <canvas id="current-portfolio-chart-canvas"></canvas> <!-- Correct canvas ID -->
+        </div>
+
+        <!-- Chart for Optimized Portfolio -->
+        <div id="optimized-portfolio-chart" class="chart">
+            <h2>Optimized Portfolio</h2>
+            <canvas id="optimized-portfolio-chart-canvas"></canvas> <!-- Correct canvas ID -->
+        </div>
+    </div>
+
+    <script src="script.js"></script> <!-- Include external script -->
+</body>
+</html>

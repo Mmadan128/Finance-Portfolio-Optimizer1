@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block title %}Optimization - Portfolio Optimizer{% endblock %}
+
+{% block content %}
+<div class="container mt-4 text-white">
+    <h1 class="text-center mb-4">Portfolio Optimization</h1>
+
+    <!-- Optimization Form Section -->
+    <div class="card bg-dark p-4 mb-4">
+        <form method="POST" action="{% url 'optimize_portfolio' %}">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="riskLevel" class="form-label">Select Risk Level:</label>
+                <select id="riskLevel" name="risk_level" class="form-select" required>
+                    <option value="low">Low Risk</option>
+                    <option value="medium">Medium Risk</option>
+                    <option value="high">High Risk</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="investmentAmount" class="form-label">Investment Amount:</label>
+                <input type="number" id="investmentAmount" name="investment_amount" class="form-control" 
+                       placeholder="e.g., 10000" required min="1">
+            </div>
+
+            <div class="mb-3">
+                <label for="timeHorizon" class="form-label">Time Horizon (Years):</label>
+                <input type="number" id="timeHorizon" name="time_horizon" class="form-control" 
+                       placeholder="e.g., 5" required min="1">
+            </div>
+
+            <!-- User Stock Input Section -->
+            <div id="stockInputs">
+                <div class="mb-3">
+                    <label for="stockTicker1" class="form-label">Stock Ticker 1:</label>
+                    <input type="text" id="stockTicker1" name="stock_tickers" class="form-control" 
+                           placeholder="e.g., AAPL" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="stockPercentage1" class="form-label">Percentage Allocation:</label>
+                    <input type="number" id="stockPercentage1" name="stock_percentages" class="form-control" 
+                           placeholder="e.g., 50" required min="0" max="100">
+                </div>
+
+                <div class="mb-3">
+                    <label for="stockTicker2" class="form-label">Stock Ticker 2:</label>
+                    <input type="text" id="stockTicker2" name="stock_tickers" class="form-control" 
+                           placeholder="e.g., TSLA">
+                </div>
+
+                <div class="mb-3">
+                    <label for="stockPercentage2" class="form-label">Percentage Allocation:</label>
+                    <input type="number" id="stockPercentage2" name="stock_percentages" class="form-control" 
+                           placeholder="e.g., 30" min="0" max="100">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Optimize Portfolio</button>
+        </form>
+    </div>
+
+    <!-- Display Optimization Results -->
+    {% if results %}
+    <div class="card bg-dark p-4 mt-4">
+        <h2>Optimized Portfolio Results</h2>
+        <ul class="list-group">
+            <li class="list-group-item bg-dark text-white">
+                <strong>Stocks:</strong> {{ results.stocks }}%
+            </li>
+            <li class="list-group-item bg-dark text-white">
+                <strong>Bonds:</strong> {{ results.bonds }}%
+            </li>
+            <li class="list-group-item bg-dark text-white">
+                <strong>Real Estate:</strong> {{ results.real_estate }}%
+            </li>
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

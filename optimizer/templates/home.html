@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block title %}Home - Portfolio Optimizer{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center text-white">
+    <h1>Welcome to the Portfolio Optimizer</h1>
+    <p class="lead">Optimize your investments with cutting-edge technology and AI.</p>
+
+    <!-- Spline 3D Widget Section -->
+    <div class="spline-widget-container mt-5">
+        <iframe src="https://my.spline.design/rocket-dbfb03b766ad2b4229fb5b902f60b4e8/" 
+                frameborder="0"
+                width="100%"
+                height="500px"
+                style="border-radius: 15px;">
+        </iframe>
+    </div>
+
+    <div class="mt-5">
+        <a href="{% url 'optimize_portfolio' %}" class="btn btn-primary">Get Started</a>
+    </div>
+</div>
+
+<style>
+    .spline-widget-container {
+        margin: 0 auto;
+        max-width: 800px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+</style>
+{% endblock %}

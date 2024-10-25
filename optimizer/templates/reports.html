@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Performance Reports</h1>
+    <div class="chart-section">
+        <h2>Portfolio Performance Over Time</h2>
+        <div class="chart-container">
+            <canvas id="performanceChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
