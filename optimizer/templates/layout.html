@@ -11,8 +11,37 @@
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <!-- Include custom CSS -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
+    <style>
+        /* Styles for the background video */
+        .background-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1; /* Set below other elements */
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Optional overlay for better text visibility */
+            z-index: 1;
+        }
+    </style>
 </head>
 <body class="bg-dark text-light">
+    <!-- Background Video -->
+    <video autoplay muted loop class="background-video">
+        <source src="{% static 'videos/background.mp4' %}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <div class="overlay"></div>
+
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
@@ -23,7 +52,6 @@
                         <li class="nav-item">
                             <a class="nav-link text-white" href="{% url 'home' %}">Home</a>
                         </li>
-                        <li class="nav-item">
                         <li class="nav-item">
                             <a class="nav-link text-white" href="{% url 'login' %}">Login</a>
                         </li>

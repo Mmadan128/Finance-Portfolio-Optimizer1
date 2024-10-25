@@ -1,15 +1,38 @@
+<!-- reports.html -->
 {% extends "layout.html" %}
 
-{% block title %}Reports{% endblock %}
+{% block title %}Optimization Reports{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h1>Performance Reports</h1>
-    <div class="chart-section">
-        <h2>Portfolio Performance Over Time</h2>
-        <div class="chart-container">
-            <canvas id="performanceChart"></canvas>
-        </div>
-    </div>
+    <h1 class="text-center">Optimization Reports</h1>
+    <table class="table table-striped mt-4">
+        <thead>
+            <tr>
+                <th>S.No</th> <!-- Add Serial Number Column -->
+                <th>Investment Amount</th>
+                <th>Time Horizon (Years)</th>
+                <th>Stock Tickers</th>
+                <th>Stock Percentages</th>
+                <th>Expected Return</th>
+                <th>Expected Volatility</th>
+                <th>Sharpe Ratio</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr>
+                <td>{{ forloop.counter }}</td> <!-- Serial Number -->
+                <td>${{ report.investment_amount|floatformat:2 }}</td>
+                <td>{{ report.time_horizon }}</td>
+                <td>{{ report.stock_tickers }}</td>
+                <td>{{ report.stock_percentages }}</td>
+                <td>{{ report.expected_return|floatformat:2 }}%</td>
+                <td>{{ report.expected_volatility|floatformat:2 }}%</td>
+                <td>{{ report.sharpe_ratio|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

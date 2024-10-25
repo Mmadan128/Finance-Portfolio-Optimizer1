@@ -5,9 +5,9 @@ from .views import home, dashboard_view, optimization, portfolio, reports, login
 urlpatterns = [
     path('', home, name='home'), # Default route
     path('login/', login_view, name='login'),  # Add login route
-    path('register/', register_view, name='register'),
+     path('register/', register_view, name='register'),
     path('dashboard/', dashboard_view, name='dashboard'),
-    path('optimization/', optimization, name='optimize_portfolio'),
+    path('optimization/', optimization, name='optimization'),
 
     path('portfolio/', portfolio, name='portfolio'),
     path('reports/', reports, name='reports'),

@@ -7,9 +7,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from .portfolio_optimizer import optimize_portfolio
 from .ml_models.stock_predictor import StockPredictor
-
-
-
+from .forms import RegistrationForm
+from .models import OptimizationReport
 def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -25,54 +24,114 @@ def login_view(request):
     return render(request, 'login.html')
 def register_view(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            login(request, user)  # Automatically log the user in
+            return redirect('home')  # Redirect to home or dashboard after registration
+    else:
+        form = RegistrationForm()
 
-        # Create a new user
-        user = User.objects.create_user(username=username, email=email, password=password)
-        user.save()
-        messages.success(request, 'Registration successful. Please log in.')
-        return redirect('login')  # Redirect to login page after registration
-
-    return render(request, 'register.html')  # Render registration template
+    return render(request, 'register.html', {'form': form})
 def dashboard_view(request):
-    prediction = None
-    score = None
-
-    if request.method == 'POST':
-        ticker = request.POST.get('ticker')  # Get the ticker from the form
-        predictor = StockPredictor(ticker)
-        score = predictor.train()  # Train the model and get the score
-        recent_data = [100, 101, 102, 103, 104]  # Example recent data, replace with actual
-        prediction = predictor.predict(recent_data)  # Make a prediction
-
-    return render(request, 'dashboard.html', {'prediction': prediction, 'score': score})
+    if request.user.is_authenticated:
+        context = {
+            'is_authenticated': True,
+            'user': request.user,
+        }
+    else:
+        context = {
+            'is_authenticated': False,
+        }
+    return render(request, 'dashboard.html', context)
 
 def home(request):
     return render(request, 'home.html')
+
+
+
 
 def optimization(request):
     results = None
 
     if request.method == 'POST':
-        risk_level = request.POST.get('risk_level')
-        investment_amount = float(request.POST.get('investment_amount'))
-        time_horizon = int(request.POST.get('time_horizon'))
+        try:
+            # Get user inputs from the form
+            investment_amount = float(request.POST.get('investment_amount'))
+            time_horizon = int(request.POST.get('time_horizon'))
+            stock_tickers = [ticker.strip() for ticker in request.POST.get('stock_tickers').split(',')]
+            stock_percentages_str = request.POST.get('stock_percentages')  # Assume this comes as a string
+            stock_percentages = [float(p.strip()) for p in stock_percentages_str.split(',')]  # Split and convert
 
-        # Collect stock tickers and allocations as lists
-        tickers = request.POST.getlist('stock_tickers')
-        percentages = [float(p) for p in request.POST.getlist('stock_percentages')]
+            # Call the optimize_portfolio function
+            results = optimize_portfolio(investment_amount, time_horizon, stock_tickers, stock_percentages)
 
-        # Call the optimization logic
-        results = optimize_portfolio(risk_level, investment_amount, time_horizon, tickers, percentages)
+            # Save the optimization report
+            report = OptimizationReport(
+                investment_amount=investment_amount,
+                time_horizon=time_horizon,
+                stock_tickers=','.join(stock_tickers),
+                stock_percentages=','.join(map(str, stock_percentages)),
+                expected_return=results['expected_return'],
+                expected_volatility=results['expected_volatility'],
+                sharpe_ratio=results['sharpe_ratio']
+            )
+            report.save()
 
-    return render(request, 'optimizer/optimization.html', {'results': results})
+        except ValueError as e:
+            results = {'success': False, 'message': f"Invalid input: {str(e)}"}
 
+    return render(request, 'optimization.html', {'results': results})
 def portfolio(request):
-    return render(request, 'portfolio.html')
+    # Define your portfolio
+    portfolio = {
+        'AAPL': {'shares': 50, 'purchase_price': 120.00},
+        'MSFT': {'shares': 30, 'purchase_price': 200.00},
+        'GOOGL': {'shares': 10, 'purchase_price': 1500.00},
+        'TSLA': {'shares': 5, 'purchase_price': 600.00},
+    }
+
+    # Prepare a list of tickers for AJAX request
+    tickers = list(portfolio.keys())
+
+    # Pass tickers to the context
+    context = {
+        'portfolio': portfolio,
+        'tickers': tickers,
+    }
+    
+    return render(request, 'portfolio.html', context)
+
+from django.shortcuts import render
+from .models import OptimizationReport
 
 def reports(request):
-    return render(request, 'reports.html')
+    reports = OptimizationReport.objects.all()
+    
+    # Preprocess the stock tickers and percentages
+    for report in reports:
+        # Strip whitespace and convert to lists
+        report.stock_tickers_list = [ticker.strip() for ticker in report.stock_tickers.split(',')]
+        report.stock_percentages_list = [percentage.strip() for percentage in report.stock_percentages.split(',')]
+
+    return render(request, 'reports.html', {'reports': reports})
+
 def home(request):
     return render(request, 'home.html')
+
+# views.py
+
+from django.http import JsonResponse
+import yfinance as yf
+
+def fetch_realtime_data(request):
+    if request.method == "GET":
+        tickers = request.GET.getlist('tickers[]')  # Expecting an array of tickers
+        data = {}
+        for ticker in tickers:
+            stock = yf.Ticker(ticker)
+            current_price = stock.history(period='1d')['Close'].iloc[-1]  # Get the last closing price
+            data[ticker] = current_price
+        return JsonResponse(data)

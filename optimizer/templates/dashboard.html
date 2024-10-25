@@ -1,10 +1,106 @@
-{% extends "layout.html" %}
+<!-- templates/users/dashboard.html -->
+{% extends 'layout.html' %}
 
 {% block title %}Dashboard{% endblock %}
 
+{% block sidebar %}
+<h2>Portfolio Optimizer</h2>
+<ul>
+    <li><a href="{% url 'login' %}">Login</a></li>
+    <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li><a href="{% url 'portfolio' %}">Portfolio</a></li>
+    <li><a href="{% url 'optimization' %}">Optimization</a></li>
+    <li><a href="{% url 'reports' %}">Reports</a></li>
+</ul>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h1>Dashboard</h1>
-    <!-- Dashboard content goes here -->
+<div class="widgets-section">
+    <div class="widget">
+        <div class="progress-circle">
+            <div class="progress-value">60%</div>
+        </div>
+        <h2>Portfolio Return</h2>
+    </div>
+    <div class="widget">
+        <div class="progress-circle" style="background: conic-gradient(#FFCE56 0 40%, #f4f4f9 40%);">
+            <div class="progress-value">40%</div>
+        </div>
+        <h2>Volatility</h2>
+    </div>
+    <div class="widget">
+        <div class="progress-circle" style="background: conic-gradient(#FF6384 0 70%, #f4f4f9 70%);">
+            <div class="progress-value">70%</div>
+        </div>
+        <h2>Sharpe Ratio</h2>
+    </div>
 </div>
+
+<div class="info-cards">
+    <div class="info-card">
+        <h3>Expected Returns</h3>
+        <p>9.3%</p>
+    </div>
+    <div class="info-card">
+        <h3>Volatility</h3>
+        <p>12.5%</p>
+    </div>
+    <div class="info-card">
+        <h3>Variance</h3>
+        <p>1.5%</p>
+    </div>
+</div>
+
+<div class="chart-section">
+    <div class="chart-container">
+        <canvas id="assetChart"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function initializeAssetAllocationChart() {
+        var ctx = document.getElementById('assetChart').getContext('2d');
+        var assetChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Stocks', 'Bonds', 'Real Estate'],
+                datasets: [{
+                    label: 'Asset Allocation',
+                    data: [40, 35, 25],
+                    backgroundColor: ['#36A2EB', '#FFCE56', '#FF6384'],
+                    hoverBackgroundColor: ['#36A2EB', '#FFCE56', '#FF6384'],
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { color: '#333' } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.label + ': ' + tooltipItem.raw + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#333', callback: (value) => value + '%' }
+                    },
+                    x: { ticks: { color: '#333' } }
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeAssetAllocationChart();
+    });
+</script>
 {% endblock %}

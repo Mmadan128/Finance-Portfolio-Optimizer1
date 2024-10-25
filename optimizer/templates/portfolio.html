@@ -3,8 +3,147 @@
 {% block title %}Portfolio{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1>Your Portfolio</h1>
-    <!-- Portfolio content goes here -->
+<div class="container mt-4" style="max-height: 100vh; overflow-y: auto;">
+    <h1 class="text-center mb-4">Your Investment Portfolio</h1>
+    
+    <!-- Portfolio Overview Section -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center bg-light">
+                <div class="card-header">
+                    <h5>Total Investment</h5>
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title" id="totalInvestment">${{ total_investment|floatformat:2 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center bg-light">
+                <div class="card-header">
+                    <h5>Current Value</h5>
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title" id="currentValue">${{ current_value|floatformat:2 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center bg-light">
+                <div class="card-header">
+                    <h5>Portfolio Growth</h5>
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title" id="portfolioGrowth">{{ portfolio_growth|floatformat:2 }}%</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Portfolio Details Section -->
+    <h2>Portfolio Holdings</h2>
+    <div style="overflow-x: auto;">
+        <table class="table table-striped" id="portfolioTable">
+            <thead>
+                <tr>
+                    <th>Stock Ticker</th>
+                    <th>Shares</th>
+                    <th>Purchase Price</th>
+                    <th>Current Price</th>
+                    <th>Value</th>
+                    <th>Change (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticker, data in portfolio.items %}
+                <tr data-ticker="{{ ticker }}">
+                    <td>{{ ticker }}</td>
+                    <td>{{ data.shares }}</td>
+                    <td>${{ data.purchase_price|floatformat:2 }}</td>
+                    <td class="current-price">${{ data.current_price|floatformat:2 }}</td>
+                    <td class="value">${{ data.value|floatformat:2 }}</td>
+                    <td class="change">0%</td> <!-- This will be updated later -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Portfolio Summary Section -->
+    <h2 class="mt-4">Portfolio Summary</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Allocation by Sector</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="sectorChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Top 5 Holdings</h5>
+                </div>
+                <div class="card-body">
+                    <ol>
+                        <li>AAPL - 40%</li>
+                        <li>MSFT - 35%</li>
+                        <li>GOOGL - 15%</li>
+                        <li>TSLA - 7%</li>
+                        <li>AMZN - 3%</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Function to fetch real-time stock prices
+    function fetchRealTimeData() {
+        const tickers = [{% for ticker in tickers %}'{{ ticker }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+        
+        $.get("/fetch_realtime_data/", { 'tickers[]': tickers }, function(data) {
+            let totalInvestment = 0;
+            let currentValue = 0;
+
+            // Update the table with fetched prices
+            for (const ticker of tickers) {
+                const currentPrice = data[ticker];
+                const row = $('#portfolioTable tbody tr[data-ticker="' + ticker + '"]');
+                const shares = parseFloat(row.find('td:nth-child(2)').text());
+                const purchasePrice = parseFloat(row.find('td:nth-child(3)').text().replace('$', ''));
+                
+                // Update current price and value
+                row.find('.current-price').text(`$${currentPrice.toFixed(2)}`);
+                const value = currentPrice * shares;
+                row.find('.value').text(`$${value.toFixed(2)}`);
+                
+                // Calculate change percentage
+                const changePercentage = ((currentPrice - purchasePrice) / purchasePrice) * 100;
+                row.find('.change').text(`${changePercentage.toFixed(2)}%`);
+
+                // Update total values
+                totalInvestment += purchasePrice * shares;
+                currentValue += value;
+            }
+
+            // Update the overview cards
+            $('#totalInvestment').text(`$${totalInvestment.toFixed(2)}`);
+            $('#currentValue').text(`$${currentValue.toFixed(2)}`);
+            const portfolioGrowth = ((currentValue - totalInvestment) / totalInvestment) * 100;
+            $('#portfolioGrowth').text(`${portfolioGrowth.toFixed(2)}%`);
+        });
+    }
+
+    // Fetch real-time data when the page loads
+    $(document).ready(function() {
+        fetchRealTimeData();
+    });
+</script>
 {% endblock %}
