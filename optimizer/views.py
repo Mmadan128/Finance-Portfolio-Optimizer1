@@ -105,7 +105,6 @@ def portfolio(request):
     
     return render(request, 'portfolio.html', context)
 
-from django.shortcuts import render
 from .models import OptimizationReport
 
 def reports(request):
@@ -136,32 +135,116 @@ def fetch_realtime_data(request):
             data[ticker] = current_price
         return JsonResponse(data)
 
+
+
+
+from django.conf import settings
 from web3 import Web3
+import logging
+logger = logging.getLogger(__name__)
 
-def eth_interaction(request):
+# Your ABI stored as a Python list
+ABI = [
+    {
+        "inputs": [],
+        "name": "deposit",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [{"internalType": "uint256", "name": "reward", "type": "uint256"}],
+        "name": "distributeRewards",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}],
+        "name": "withdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{"internalType": "address", "name": "", "type": "address"}],
+        "name": "balances",
+        "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getBalance",
+        "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getInvestors",
+        "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "name": "investors",
+        "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]
+
+
+def smart_form_view(request):
+    txn_hash = None
+    error_message = None
+
     if request.method == 'POST':
-        # Get data from the form
-        recipient_address = request.POST.get('recipient_address')
-        amount = request.POST.get('amount')
-
+        action = request.POST.get('action')
+        
         # Connect to Ethereum node
         w3 = Web3(Web3.HTTPProvider(settings.ETH_NODE_URL))
 
-        # Create a transaction
-        transaction = {
-            'to': recipient_address,
-            'value': w3.toWei(amount, 'ether'),
-            'gas': 2000000,
-            'gasPrice': w3.toWei('50', 'gwei'),
-            'nonce': w3.eth.getTransactionCount(w3.eth.defaultAccount),
-        }
+        # Check if the connection to the provider is successful
+        try:
+            # This will raise an error if the connection is not successful
+            latest_block = w3.eth.block_number
+        except Exception as e:
+            error_message = f"Unable to connect to Ethereum node: {str(e)}"
+            return render(request, 'smart_form.html', {
+                'txn_hash': txn_hash,
+                'error_message': error_message,
+            })
 
-        # Sign the transaction
-        signed_txn = w3.eth.account.signTransaction(transaction, private_key='YOUR_PRIVATE_KEY')  # Use environment variables for security
+        # Example action handling
+        if action == "transfer":
+            recipient_address = request.POST.get('recipient_address')
+            amount = request.POST.get('amount')
 
-        # Send the transaction
-        txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+            try:
+                # Get the transaction count for the default account
+                default_account = settings.DEFAULT_ACCOUNT  # Ensure you set this in your settings
+                nonce = w3.eth.get_transaction_count(default_account)
 
-        return render(request, 'eth_interaction.html', {'txn_hash': txn_hash.hex()})
+                # Prepare transaction
+                tx = {
+                    'to': recipient_address,
+                    'value': w3.to_wei(float(amount), 'ether'),
+                    'gas': 2000000,
+                    'gasPrice': w3.to_wei('50', 'gwei'),
+                    'nonce': nonce,
+                }
 
-    return render(request, 'eth_interaction.html')
+                # Sign and send the transaction
+                signed_tx = w3.eth.account.sign_transaction(tx, private_key=settings.PRIVATE_KEY)
+                txn_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+
+            except Exception as e:
+                error_message = f"Transaction failed: {str(e)}"
+
+    return render(request, 'smart_form.html', {
+        'txn_hash': txn_hash.hex() if txn_hash else None,
+        'error_message': error_message,
+    })

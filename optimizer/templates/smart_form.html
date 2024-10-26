@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>Smart Contract Interaction</h1>
+
+{% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+{% endif %}
+
+{% if txn_hash %}
+    <p style="color: green;">Transaction successful! Hash: <a href="https://etherscan.io/tx/{{ txn_hash }}">{{ txn_hash }}</a></p>
+{% endif %}
+
+<form method="POST" action="{% url 'smart_form' %}">
+    {% csrf_token %}
+    <label for="action">Select Action:</label><br>
+    <select id="action" name="action" required>
+        <option value="">--Select Action--</option>
+        <option value="transfer">Transfer ETH</option>
+        <option value="mint">Mint Tokens</option>
+        <option value="burn">Burn Tokens</option>
+    </select><br><br>
+
+    <!-- Transfer Fields -->
+    <div id="transferFields" class="action-fields" style="display: none;">
+        <label for="recipient_address">Recipient Address:</label><br>
+        <input type="text" id="recipient_address" name="recipient_address" required><br><br>
+        
+        <label for="amount">Amount (ETH):</label><br>
+        <input type="number" id="amount" name="amount" step="0.01" min="0" required><br><br>
+    </div>
+
+    <input type="submit" value="Submit">
+</form>
+
+<script>
+    const actionSelect = document.getElementById('action');
+    const transferFields = document.getElementById('transferFields');
+
+    actionSelect.addEventListener('change', function() {
+        transferFields.style.display = this.value === 'transfer' ? 'block' : 'none';
+    });
+</script>
+
+
+<script>
+    const actionSelect = document.getElementById('action');
+    const transferFields = document.getElementById('transferFields');
+
+    actionSelect.addEventListener('change', function() {
+        if (this.value === 'transfer') {
+            transferFields.style.display = 'block';
+        } else {
+            transferFields.style.display = 'none';
+        }
+    });
+</script>
+
+
+
+<script>
+    const actionSelect = document.getElementById('action');
+    const actionFields = document.querySelectorAll('.action-fields');
+
+    actionSelect.addEventListener('change', function () {
+        // Hide all fields initially
+        actionFields.forEach(field => field.style.display = 'none');
+
+        // Show fields based on selected action
+        switch (this.value) {
+            case 'transfer':
+                document.getElementById('transferFields').style.display = 'block';
+                break;
+            case 'mint':
+                document.getElementById('mintFields').style.display = 'block';
+                break;
+            case 'burn':
+                document.getElementById('burnFields').style.display = 'block';
+                break;
+            case 'setVariable':
+                document.getElementById('setVariableFields').style.display = 'block';
+                break;
+            case 'approve':
+                document.getElementById('approveFields').style.display = 'block';
+                break;
+            case 'transferFrom':
+                document.getElementById('transferFromFields').style.display = 'block';
+                break;
+            case 'destroy':
+                document.getElementById('destroyFields').style.display = 'block';
+                break;
+        }
+    });
+</script>
+
+{% endblock %}
