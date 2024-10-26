@@ -197,49 +197,71 @@ ABI = [
 ]
 
 
+from django.shortcuts import render
+from django.conf import settings
+from web3 import Web3
+
+
+
+from django.shortcuts import render
+from django.conf import settings
+from web3 import Web3
+
+from django.conf import settings
+from django.shortcuts import render
+from web3 import Web3
+
+
 def smart_form_view(request):
     txn_hash = None
     error_message = None
 
     if request.method == 'POST':
         action = request.POST.get('action')
-        
+
         # Connect to Ethereum node
         w3 = Web3(Web3.HTTPProvider(settings.ETH_NODE_URL))
 
         # Check if the connection to the provider is successful
-        try:
-            # This will raise an error if the connection is not successful
-            latest_block = w3.eth.block_number
-        except Exception as e:
-            error_message = f"Unable to connect to Ethereum node: {str(e)}"
+        if not w3.isConnected():
+            error_message = "Unable to connect to Ethereum node."
             return render(request, 'smart_form.html', {
                 'txn_hash': txn_hash,
                 'error_message': error_message,
             })
 
-        # Example action handling
+        # Action handling
         if action == "transfer":
             recipient_address = request.POST.get('recipient_address')
             amount = request.POST.get('amount')
 
+            # Validate recipient address
+            if not w3.isAddress(recipient_address):
+                error_message = "Invalid recipient address."
+                return render(request, 'smart_form.html', {
+                    'txn_hash': txn_hash,
+                    'error_message': error_message,
+                })
+
             try:
                 # Get the transaction count for the default account
                 default_account = settings.DEFAULT_ACCOUNT  # Ensure you set this in your settings
-                nonce = w3.eth.get_transaction_count(default_account)
+                nonce = w3.eth.getTransactionCount(default_account)
 
                 # Prepare transaction
                 tx = {
                     'to': recipient_address,
-                    'value': w3.to_wei(float(amount), 'ether'),
+                    'value': w3.toWei(float(amount), 'ether'),  # Convert amount to wei
                     'gas': 2000000,
-                    'gasPrice': w3.to_wei('50', 'gwei'),
+                    'gasPrice': w3.toWei('50', 'gwei'),
                     'nonce': nonce,
                 }
 
-                # Sign and send the transaction
+                # Sign the transaction
                 signed_tx = w3.eth.account.sign_transaction(tx, private_key=settings.PRIVATE_KEY)
-                txn_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+
+                # Send the signed transaction
+                txn_hash = w3.eth.sendRawTransaction(signed_tx.rawTransaction)
 
             except Exception as e:
                 error_message = f"Transaction failed: {str(e)}"
