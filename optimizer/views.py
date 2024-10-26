@@ -214,7 +214,7 @@ def smart_form_view(request):
         except Exception as e:
             error_message = f"Unable to connect to Ethereum node: {str(e)}"
             return render(request, 'smart_form.html', {
-                'txn_hash': txn_hash,
+                'txn_hash': None,
                 'error_message': error_message,
             })
 
@@ -239,10 +239,14 @@ def smart_form_view(request):
 
                 # Sign and send the transaction
                 signed_tx = w3.eth.account.sign_transaction(tx, private_key=settings.PRIVATE_KEY)
-                txn_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+                txn_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 
             except Exception as e:
                 error_message = f"Transaction failed: {str(e)}"
+                return render(request, 'smart_form.html', {
+                    'txn_hash': None,
+                    'error_message': error_message,
+                })
 
     return render(request, 'smart_form.html', {
         'txn_hash': txn_hash.hex() if txn_hash else None,
